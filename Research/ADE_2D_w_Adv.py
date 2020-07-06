@@ -9,8 +9,9 @@ magnitude_spatial_x = 1
 magnitude_spatial_y = 1
 Diffusion_Coefficient = 1
 time_step = (1/(2*Diffusion_Coefficient))*(((x_step_size*y_step_size)**2)/((x_step_size**2) + (y_step_size**2)))
-length_of_time = 100*time_step
-velocity = [0.01,3]
+length_of_time = 10*time_step
+velocity = [1,1]
+
 #-----------defining the mesh class------------
 class Mesh_Object:
 
@@ -99,7 +100,7 @@ def check_direction_and_magnitude(v):
     return direction,magnitude,angle
 
 vel_dir,vel_mag,vel_ang = check_direction_and_magnitude(velocity)
-
+print(vel_dir,vel_mag,vel_ang,(vel_mag*time_step))
 #----initialize the concentration field, define mesh domain ------------
 null_u = [[0 for i in range(0,math.floor(magnitude_spatial_x/x_step_size))] for j in range(0,math.floor(magnitude_spatial_y/y_step_size))]
 
@@ -120,12 +121,12 @@ x_field, y_field = create_x_and_y_points(x_step_size,y_step_size,magnitude_spati
 
 #----------creating the mesh object---------------
 Two_D_Mesh = Mesh_Object(x_field,y_field,init_u_xy)
-print(Two_D_Mesh.u_xy)
+#print(Two_D_Mesh.u_xy)
 
 #-----set the boundary conditions-------------------
 
 for i in range(0,math.floor(magnitude_spatial_y/y_step_size)):
-    Two_D_Mesh.u_xy[0][i] = 1
+    Two_D_Mesh.u_xy[0][i] = 0
 
 for i in range(0,math.floor(magnitude_spatial_y/y_step_size)):
     Two_D_Mesh.u_xy[-1][i] = 0
@@ -147,8 +148,9 @@ for t in range(0,math.floor(length_of_time/time_step)):
                 Two_D_Mesh.u_xy[i][j] = 1
             elif Two_D_Mesh.u_xy[i][j] <0:
                 Two_D_Mesh.u_xy[i][j] = 0
-
-print(Two_D_Mesh.u_xy)
+#print(Two_D_Mesh.u_xy)
+print(vel_dir,vel_mag,vel_ang,(vel_mag*time_step))
+print(2*math.sqrt(time_step))
 plt.imshow(Two_D_Mesh.u_xy, cmap='viridis', interpolation='nearest')
 plt.title('2-D Diffusion with ' + str(math.floor(length_of_time/time_step)) + ' time steps')
 plt.show()
