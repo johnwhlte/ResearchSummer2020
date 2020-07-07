@@ -22,16 +22,16 @@ u_ns = []
 xs = []
 ts = []
 
-def initial(x):
+def initial_value_function(x):
     return 2
 
-def error_func(x,t):
+def source_or_sink(x,t):
     return 0.001*x**2*t
 
 def solver_ADE_Simple(dx,dt,L,T,a,D,U,I,f):
-    
+
     t0 = time.process_time()
-    
+
     Nt = int(round(T/float(dt)))
     t = np.linspace(0, Nt*dt, Nt+1)   # Mesh points in time
     dx = np.sqrt(a*dt/D)
@@ -40,14 +40,14 @@ def solver_ADE_Simple(dx,dt,L,T,a,D,U,I,f):
     # Make sure dx and dt are compatible with x and t
     dx = x[1] - x[0]
     dt = t[1] - t[0]
-    
+
     u   = np.zeros(Nx+1)
     u_n = np.zeros(Nx+1)
-    
+
     # Set initial condition u(x,0) = I(x)
     for i in range(0, Nx+1):
         u_n[i] = I(x[i])
-    
+
     for n in range(0, Nt):
         # Compute u at inner mesh points
         for i in range(1, Nx):
@@ -55,7 +55,7 @@ def solver_ADE_Simple(dx,dt,L,T,a,D,U,I,f):
                    dt*f(x[i], t[n])
 
         # Insert boundary conditions
-        u[0] = 0;  u[Nx] = 0
+        u[0] = 1;  u[Nx] = 0
 
         # Switch variables before next step
         #u_n[:] = u  # safe, but slow
@@ -64,25 +64,16 @@ def solver_ADE_Simple(dx,dt,L,T,a,D,U,I,f):
     t1 = time.process_time()
     return u_n, x, t, t1-t0  # u_n holds latest u
 
-sol = solver_ADE_Simple(0.1,0.1,10,10,1,5,0.5,initial,error_func)
-
+sol = solver_ADE_Simple(0.1,0.1,10,10,1,0.01,0.005,initial_value_function,source_or_sink)
 for i in range(0,len(sol[0])):
     u_ns.append(sol[0][i])
 for i in range(0,len(sol[1])):
     xs.append(sol[1][i])
 for i in range(0,len(sol[2])):
     ts.append(sol[2][i])
-    
+
 plt.plot(xs,u_ns,'r-')
-plt.plot(ts,u_ns,'b-')
+
 plt.show()
 
 print(sol)
-
-
-
-
-
-
-
-

@@ -9,7 +9,7 @@ magnitude_spatial_x = 1
 magnitude_spatial_y = 1
 Diffusion_Coefficient = 1
 time_step = (1/(2*Diffusion_Coefficient))*(((x_step_size*y_step_size)**2)/((x_step_size**2) + (y_step_size**2)))
-length_of_time = 100*time_step
+length_of_time = 10*time_step
 
 #-----------defining the mesh class------------
 class Mesh_Object:
@@ -54,7 +54,7 @@ def MOC(delta_t,delta_x,delta_y,x_length,y_length,u,velocity_field):
                 y_stepper = 0
             if v_direct =='down' or 'up':
                 x_stepper = 0
-            if p + num_of_xsteps + x_stepper > 0 and q + num_of_ysteps + y_stepper> 0 and p + num_of_xsteps + x_stepper < math.floor(x_length/delta_x) and q - num_of_ysteps - y_stepper < math.floor(y_length/delta_y):
+            if p + num_of_xsteps + x_stepper > 0 and q + num_of_ysteps + y_stepper> 0 and p + num_of_xsteps + x_stepper < math.floor(x_length/delta_x) and q + num_of_ysteps + y_stepper < math.floor(y_length/delta_y):
                 u_pstar[p][q] = characteristic_info(x_length,y_length,delta_x,delta_y,num_of_xsteps,num_of_ysteps,x_stepper,y_stepper,d_xstar,d_ystar,u,p,q)
             else:
                 u_pstar[p][q] = 0
@@ -77,7 +77,7 @@ def characteristic_info(x_length,y_length,x_step,y_step,num_of_xsteps,num_of_yst
     store_info_surrounding[2][3] = store_info_surrounding[1][3]/(store_info_surrounding[1][0] + store_info_surrounding[1][1] + store_info_surrounding[1][2] + store_info_surrounding[1][3])
     u_pstar = store_info_surrounding[0][0]*store_info_surrounding[2][0] + store_info_surrounding[0][1]*store_info_surrounding[2][1] + store_info_surrounding[0][2]*store_info_surrounding[2][2] + store_info_surrounding[0][3]*store_info_surrounding[2][3]
     return u_pstar
-#-----directional,magnitude,angle check for MOC------------------
+#-----directional,magnitude,angle check for MOC and defining the Velocity Field------------------
 def check_direction_and_magnitude(v):
     if v[0] == 0 and v[1] == 0:
         return 0
@@ -101,18 +101,16 @@ def check_direction_and_magnitude(v):
         print('error in velocity')
 
     magnitude = math.sqrt(v[0]**2 + v[1]**2)
-    angle = math.acos((abs(v[0])/magnitude))
+    angle = math.acos((abs(v[1])/magnitude))
 
     return direction,magnitude,angle
 
 def Velocity_Field(x_step,y_step,x_length,y_length):
-    velocities = [[0 for i in range(0,math.floor(x_length/x_step))] for j in range(0,math.floor(y_length/y_step))]
+    velocities = [[[0,0] for i in range(0,math.floor(x_length/x_step))] for j in range(0,math.floor(y_length/y_step))]
     for i in range(0,math.floor(x_length/x_step)):
         for j in range(0,math.floor(y_length/y_step)):
-            if i > 50 and i < 250:
-                velocities[i][j] = [20000,1]
-            else:
-                velocities[i][j] = [1,1]
+            velocities[i][j] = [1,1]
+    print(type(velocities))
     return velocities
 #----initialize the concentration field, define mesh domain ------------
 null_u = [[0 for i in range(0,math.floor(magnitude_spatial_x/x_step_size))] for j in range(0,math.floor(magnitude_spatial_y/y_step_size))]
@@ -138,7 +136,7 @@ Two_D_Mesh = Mesh_Object(x_field,y_field,init_u_xy)
 #-----set the boundary conditions-------------------
 
 for i in range(0,math.floor(magnitude_spatial_y/y_step_size)):
-    Two_D_Mesh.u_xy[0][i] = 0
+    Two_D_Mesh.u_xy[0][i] = 1
 
 for i in range(0,math.floor(magnitude_spatial_y/y_step_size)):
     Two_D_Mesh.u_xy[-1][i] = 0
@@ -148,7 +146,7 @@ for i in range(0,math.floor(magnitude_spatial_x/x_step_size)):
 for i in range(0,math.floor(magnitude_spatial_x/x_step_size)):
     Two_D_Mesh.u_xy[i][-1] = 0
 
-#-----attempt at time stepping---------------------
+#-----time stepping---------------------
 
 for t in range(0,math.floor(length_of_time/time_step)):
     diffused_profile = Diffusion(x_step_size,y_step_size,magnitude_spatial_x,magnitude_spatial_y,Two_D_Mesh.u_xy,Diffusion_Coefficient,time_step)
@@ -161,6 +159,8 @@ for t in range(0,math.floor(length_of_time/time_step)):
                 Two_D_Mesh.u_xy[i][j] = 1
             elif Two_D_Mesh.u_xy[i][j] <0:
                 Two_D_Mesh.u_xy[i][j] = 0
+
+#-------plotting--------------------------
 print(2*math.sqrt(time_step))
 plt.imshow(Two_D_Mesh.u_xy, cmap='viridis', interpolation='nearest')
 plt.title('2-D Diffusion with ' + str(math.floor(length_of_time/time_step)) + ' time steps')
