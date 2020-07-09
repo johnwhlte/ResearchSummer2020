@@ -9,7 +9,7 @@ magnitude_spatial_x = 1
 magnitude_spatial_y = 1
 Diffusion_Coefficient = 1
 time_step = (1/(2*Diffusion_Coefficient))*(((x_step_size*y_step_size)**2)/((x_step_size**2) + (y_step_size**2)))
-length_of_time = 10*time_step
+length_of_time = 100*time_step
 
 #-----------defining the mesh class------------
 class Mesh_Object:
@@ -109,8 +109,7 @@ def Velocity_Field(x_step,y_step,x_length,y_length):
     velocities = [[[0,0] for i in range(0,math.floor(x_length/x_step))] for j in range(0,math.floor(y_length/y_step))]
     for i in range(0,math.floor(x_length/x_step)):
         for j in range(0,math.floor(y_length/y_step)):
-            velocities[i][j] = [1,1]
-    print(type(velocities))
+            velocities[i][j] = [-1,j**3 + 3]
     return velocities
 #----initialize the concentration field, define mesh domain ------------
 null_u = [[0 for i in range(0,math.floor(magnitude_spatial_x/x_step_size))] for j in range(0,math.floor(magnitude_spatial_y/y_step_size))]
